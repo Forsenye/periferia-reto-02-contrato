@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perxia 2.0 · Agente de Contratos Vigentes | Periferia IT Group</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #090d16;
+      color: #e2e8f0;
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.6);
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.9);
+    }
+    .md-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.8125rem;
+    }
+    .md-content th, .md-content td {
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      padding: 0.45rem 0.65rem;
+      text-align: left;
+    }
+    .md-content th {
+      background-color: rgba(30, 41, 59, 0.9);
+      color: #93c5fd;
+      font-weight: 600;
+    }
+    .md-content tr:nth-child(even) {
+      background-color: rgba(15, 23, 42, 0.45);
+    }
+    .md-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-top: 0.9rem;
+      margin-bottom: 0.45rem;
+    }
+    .md-content h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .md-content ul, .md-content ol {
+      margin-left: 1.25rem;
+      margin-top: 0.35rem;
+      margin-bottom: 0.35rem;
+    }
+    .md-content li {
+      margin-bottom: 0.25rem;
+    }
+    .md-content blockquote {
+      border-left: 3px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0.25rem;
+      color: #fde68a;
+    }
+    .md-content hr {
+      border-color: rgba(51, 65, 85, 0.7);
+      margin: 0.85rem 0;
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(245, 158, 11, 0.9); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+      50% { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    }
+    .hitl-highlight {
+      animation: pulse-border 2s infinite;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-text">
+
+  <!-- HEADER CORPORATIVO -->
+  <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur px-5 py-3 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center font-bold text-slate-950 shadow-lg shadow-emerald-500/20">
+        P2
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-slate-100 text-base tracking-tight">Perxia 2.0 · Agente de Registro de Contratos Vigentes</h1>
+          <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Reto 02 · Periferia IT Group</span>
+        </div>
+        <p class="text-xs text-slate-400">Punto único de recepción · Extracción con confianza · Validación RN1–RN5 · Human-in-the-Loop · Alertas SharePoint</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div id="health-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+        <span id="health-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-400">Motor:</span>
+        <span id="provider-label" class="font-mono text-cyan-300 font-medium">cargando...</span>
+      </div>
+      <button
+        onclick="togglePanelApiKey()"
+        id="btn-toggle-apikey"
+        class="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 text-xs font-medium transition flex items-center gap-1.5"
+        title="Configurar API Key de Gemini, OpenAI o Anthropic para usar un LLM en vivo"
+      >
+        <span>🔑</span> Configurar API Key (LLM)
+      </button>
+      <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-slate-400">
+        Sesión: <span id="session-label" class="text-slate-200">...</span>
+      </div>
+      <button
+        onclick="resetEntorno()"
+        class="px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-medium transition flex items-center gap-1.5"
+        title="Limpia out/ y restaura el maestro al corte del 2026-05-30 para repetir la demostración"
+      >
+        <span>↺</span> Reiniciar Demo (out/)
+      </button>
+    </div>
+  </header>
+
+  <!-- SECCIÓN DESPLEGABLE PARA CONFIGURAR API KEY Y PROVEEDOR LLM -->
+  <div id="apikey-panel" class="border-b border-cyan-500/30 bg-slate-900/95 px-5 py-3 shrink-0">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div class="flex flex-wrap items-end gap-3 flex-1">
+        <div>
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+            Proveedor LLM
+          </label>
+          <select
+            id="llm-provider-select"
+            onchange="actualizarPlaceholderModelo()"
+            class="bg-slate-950 border border-slate-700 focus:border-cyan-500 rounded-lg px-3 py-1.5 text-xs text-slate-100 outline-none"
+          >
+            <option value="auto">Auto-detectar por API Key (Gemini / OpenAI / Anthropic)</option>
+            <option value="gemini">Google Gemini (AIza...)</option>
+            <option value="openai">OpenAI (sk-...)</option>
+            <option value="anthropic">Anthropic Claude (sk-ant-...)</option>
+            <option value="local">Motor ReAct Local (Sin API Key)</option>
+          </select>
+        </div>
+
+        <div class="flex-1 min-w-[260px] max-w-md">
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+            API Key del Modelo <span class="text-slate-400 font-normal normal-case">(se envía solo a memoria del backend, nunca se guarda en disco ni logs)</span>
+          </label>
+          <div class="relative flex items-center">
+            <input
+              id="llm-apikey-input"
+              type="password"
+              autocomplete="off"
+              placeholder="Pega tu API Key aquí (ej. AIzaSy... o sk-...)"
+              class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-500 rounded-lg pl-3 pr-9 py-1.5 text-xs font-mono text-slate-100 outline-none"
+            />
+            <button
+              type="button"
+              onclick="toggleVerPassword()"
+              class="absolute right-2 text-slate-400 hover:text-slate-200 text-xs"
+              title="Mostrar/Ocultar clave"
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="w-48">
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+            Modelo (Opcional)
+          </label>
+          <input
+            id="llm-model-input"
+            type="text"
+            placeholder="ej. gemini-2.5-flash"
+            class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-500 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-100 outline-none"
+          />
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="guardarConfigLLM()"
+            class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-slate-950 font-semibold text-xs transition shadow"
+          >
+            ✓ Activar LLM
+          </button>
+          <button
+            type="button"
+            onclick="usarModoLocal()"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition"
+          >
+            Usar Motor Local
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="apikey-status-msg" class="text-xs font-mono text-slate-400"></span>
+        <button
+          type="button"
+          onclick="togglePanelApiKey()"
+          class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1"
+          title="Minimizar barra de API Key"
+        >
+          ✕ Ocultar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL SPLIT VIEW -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- PANEL IZQUIERDO: CHAT CONVERSACIONAL + TOOL CALLS + HITL -->
+    <section class="w-full lg:w-[56%] flex flex-col border-r border-slate-800 bg-slate-950/50">
+
+      <!-- Barra de Prompts Rápidos (Sección 11 del PRD) -->
+      <div class="px-4 py-2.5 bg-slate-900/70 border-b border-slate-800/80 flex flex-wrap items-center gap-2 shrink-0">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">Acciones rápidas:</span>
+        <button
+          onclick="usarPromptDemo()"
+          class="text-xs px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-medium transition"
+        >
+          ▶ Ejecutar Prompt Oficial Demo (Sección 11 PRD)
+        </button>
+        <button
+          onclick="usarConfirmacionMsg006()"
+          class="text-xs px-2.5 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-medium transition"
+        >
+          ✓ Confirmar msg-006 (valor 0, fin 2027-08-31)
+        </button>
+        <button
+          onclick="enviarMensajeRapido('Genera el reporte actualizado de alertas con fecha de hoy 2026-09-03.')"
+          class="text-xs px-2.5 py-1 rounded-md bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition"
+        >
+          📊 Ver Reporte de Alertas
+        </button>
+      </div>
+
+      <!-- Historial de Mensajes -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+        <!-- Mensaje de Bienvenida -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 text-[11px] font-mono rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">AGENTE PERXIA</span>
+            <span class="text-xs text-slate-400">Listo para procesar <code class="text-slate-200">fixtures/reto-02/buzon/</code></span>
+          </div>
+          <p class="mb-2">
+            Hola. Soy el agente encargado del <strong>Registro Maestro de Contratos Vigentes</strong> de Periferia IT Group (congelado al <code class="text-amber-300">2026-05-30</code>).
+          </p>
+          <p class="text-xs text-slate-400">
+            Haz clic en <strong>"Ejecutar Prompt Oficial Demo"</strong> arriba o escribe tu instrucción para clasificar los 6 mensajes del buzón, validar duplicados/otrosíes, solicitar confirmación humana en campos con confianza &lt; 0.80 y generar <code class="text-emerald-300">out/alertas.md</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- BANNER INTERACTIVO DE CONFIRMACIÓN HUMANA (HITL - CA3) -->
+      <div id="hitl-banner" class="hidden mx-4 mb-2 p-3.5 rounded-xl bg-amber-950/70 border-2 border-amber-500/80 hitl-highlight">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-amber-400 font-bold text-xs uppercase tracking-wider">⚠️ Confirmación Humana Requerida (Regla RN5 / CA3)</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-200">confianza &lt; 0.80</span>
+            </div>
+            <p class="text-xs text-amber-100/90 mt-1">
+              El agente detuvo el registro de <strong>msg-006 (CM-2026-03 · Distribuidora Caribe S.A.S.)</strong> porque <code class="text-amber-300">valor = 0</code> (confianza 0.65, contrato por demanda) y <code class="text-amber-300">fecha_fin = 2027-08-31</code> (confianza 0.60, plazo de 12 meses sin día exacto de firma) requieren tu autorización explícita.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              onclick="usarConfirmacionMsg006()"
+              class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition shadow"
+            >
+              Confirmar y Registrar msg-006
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador "Pensando / Ejecutando Herramientas" -->
+      <div id="thinking-indicator" class="hidden px-4 py-2 bg-slate-900/90 border-t border-slate-800 text-xs text-cyan-300 flex items-center gap-2.5">
+        <svg class="animate-spin h-4 w-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Ejecutando ciclo del agente y herramientas deterministas (<code class="font-mono">contratos_*</code>)...</span>
+      </div>
+
+      <!-- Formulario de Entrada -->
+      <form id="chat-form" onsubmit="handleSubmit(event)" class="p-3 bg-slate-900 border-t border-slate-800 flex gap-2 shrink-0">
+        <textarea
+          id="chat-input"
+          rows="2"
+          placeholder="Escribe un mensaje al agente (ej. 'Procesa el buzón de contratos con fecha de hoy 2026-09-03...')"
+          class="flex-1 bg-slate-950 border border-slate-700 focus:border-cyan-500 focus:outline-none rounded-lg px-3.5 py-2 text-sm text-slate-100 resize-none"
+          onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleSubmit(event); }"
+        ></textarea>
+        <button
+          id="send-btn"
+          type="submit"
+          class="px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-slate-950 font-semibold text-sm transition shadow-lg shadow-cyan-500/10"
+        >
+          Enviar
+        </button>
+      </form>
+    </section>
+
+    <!-- PANEL DERECHO: INSPECTOR EN VIVO (MAESTRO SHAREPOINT, BUZÓN, ALERTAS, AUDITORÍA) -->
+    <aside class="hidden lg:flex lg:w-[44%] flex-col bg-slate-950">
+      <!-- Pestañas del Inspector -->
+      <div class="flex border-b border-slate-800 bg-slate-900/60 px-3 pt-2 gap-1 shrink-0">
+        <button onclick="cambiarTab('maestro')" id="tab-btn-maestro" class="px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-cyan-400 text-cyan-300 bg-slate-900">
+          📁 Maestro SharePoint (<span id="count-maestro">8</span>)
+        </button>
+        <button onclick="cambiarTab('buzon')" id="tab-btn-buzon" class="px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+          📬 Buzón Entrada (<span id="count-buzon">6</span>)
+        </button>
+        <button onclick="cambiarTab('alertas')" id="tab-btn-alertas" class="px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+          🚨 Reporte Alertas
+        </button>
+        <button onclick="cambiarTab('auditoria')" id="tab-btn-auditoria" class="px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+          📜 Historial y Logs
+        </button>
+      </div>
+
+      <!-- Contenido Tab 1: Maestro de Contratos -->
+      <div id="tab-maestro" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">out/sharepoint/maestro-contratos.csv</h2>
+            <p class="text-[11px] text-slate-400">Copia de trabajo activa (el fixture original permanece intacto en solo lectura)</p>
+          </div>
+          <button onclick="cargarEstado()" class="text-xs text-cyan-400 hover:underline font-mono">Actualizar</button>
+        </div>
+        <div id="maestro-table-container" class="overflow-x-auto border border-slate-800 rounded-lg"></div>
+      </div>
+
+      <!-- Contenido Tab 2: Buzón de Entrada -->
+      <div id="tab-buzon" class="hidden flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Estado de Mensajes en fixtures/reto-02/buzon/</h2>
+        <div id="buzon-list-container" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Contenido Tab 3: Reporte de Alertas -->
+      <div id="tab-alertas" class="hidden flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Vista Previa de out/alertas.md</h2>
+          <span class="text-[11px] font-mono text-emerald-400">Corte referencia: 2026-09-03</span>
+        </div>
+        <div id="alertas-container" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono whitespace-pre-wrap text-slate-300 leading-relaxed"></div>
+      </div>
+
+      <!-- Contenido Tab 4: Historial y Logs -->
+      <div id="tab-auditoria" class="hidden flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1.5">out/sharepoint/historial.jsonl (Trazabilidad Maestro)</h3>
+          <div id="historial-container" class="space-y-1.5 font-mono text-[11px]"></div>
+        </div>
+        <hr class="border-slate-800" />
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-1.5">out/log.jsonl (Registro de Ejecución de Herramientas)</h3>
+          <div id="logs-container" class="space-y-1.5 font-mono text-[11px]"></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const sessionId = localStorage.getItem("perxia_session_id") || ("ses-" + Math.random().toString(36).slice(2, 9));
+    localStorage.setItem("perxia_session_id", sessionId);
+    document.getElementById("session-label").textContent = sessionId;
+
+    function escaparHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // Renderizador Markdown ligero (soporta tablas GFM, encabezados, listas, código, negritas y blockquotes)
+    function renderizarMarkdown(md) {
+      if (!md) return "";
+      const lines = md.split(/\r?\n/);
+      let html = "";
+      let inTable = false;
+      let inList = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        // Tablas Markdown
+        if (line.trim().startsWith("|") && line.trim().endsWith("|")) {
+          if (inList) { html += "</ul>"; inList = false; }
+          const cells = line.trim().slice(1, -1).split("|").map(c => c.trim());
+          // Ignorar fila separadora |---|---|
+          if (cells.every(c => /^:?-{2,}:?$/.test(c))) {
+            continue;
+          }
+          if (!inTable) {
+            html += '<div class="overflow-x-auto my-2"><table><thead><tr>';
+            for (const c of cells) html += `<th>${formatearInline(c)}</th>`;
+            html += "</tr></thead><tbody>";
+            inTable = true;
+          } else {
+            html += "<tr>";
+            for (const c of cells) html += `<td>${formatearInline(c)}</td>`;
+            html += "</tr>";
+          }
+          continue;
+        } else if (inTable) {
+          html += "</tbody></table></div>";
+          inTable = false;
+        }
+
+        if (line.trim() === "---") {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += "<hr/>";
+          continue;
+        }
+
+        if (line.startsWith("### ")) {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<h3>${formatearInline(line.slice(4))}</h3>`;
+          continue;
+        }
+        if (line.startsWith("#### ")) {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<h4>${formatearInline(line.slice(5))}</h4>`;
+          continue;
+        }
+        if (line.startsWith("> ")) {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<blockquote>${formatearInline(line.slice(2))}</blockquote>`;
+          continue;
+        }
+        if (/^\s*[-*]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
+          if (!inList) { html += '<ul class="list-disc pl-5 space-y-1">'; inList = true; }
+          const cleanItem = line.replace(/^\s*(?:[-*]|\d+\.)\s+/, "");
+          html += `<li>${formatearInline(cleanItem)}</li>`;
+          continue;
+        } else if (inList && line.trim() === "") {
+          html += "</ul>";
+          inList = false;
+        }
+
+        if (line.trim() === "") {
+          html += '<div class="h-1.5"></div>';
+        } else {
+          html += `<p class="my-1">${formatearInline(line)}</p>`;
+        }
+      }
+
+      if (inTable) html += "</tbody></table></div>";
+      if (inList) html += "</ul>";
+      return html;
+    }
+
+    function formatearInline(text) {
+      let s = escaparHtml(text);
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-slate-100 font-semibold">$1</strong>');
+      s = s.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-xs">$1</code>');
+      s = s.replace(/_([^_]+)_/g, '<em class="text-slate-400">$1</em>');
+      return s;
+    }
+
+    function agregarMensajeUI(role, content, toolCalls = [], needsConfirmation = false) {
+      const container = document.getElementById("chat-messages");
+      const wrapper = document.createElement("div");
+
+      if (role === "user") {
+        wrapper.className = "flex justify-end";
+        wrapper.innerHTML = `
+          <div class="max-w-[85%] rounded-2xl rounded-br-sm bg-cyan-600/25 border border-cyan-500/40 px-4 py-2.5 text-sm text-slate-100">
+            <div class="text-[10px] font-mono uppercase text-cyan-300 mb-1">Analista Administrativa</div>
+            <div class="whitespace-pre-wrap">${escaparHtml(content)}</div>
+          </div>
+        `;
+      } else {
+        let toolsHtml = "";
+        if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+          const items = toolCalls.map((tc, idx) => {
+            const okBadge = tc.ok
+              ? '<span class="px-1.5 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">OK</span>'
+              : '<span class="px-1.5 py-0.5 text-[10px] rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">RETENIDO / WARN</span>';
+            return `
+              <details class="group bg-slate-950/90 border border-slate-800 rounded-lg overflow-hidden">
+                <summary class="px-3 py-1.5 text-xs font-mono flex items-center justify-between cursor-pointer hover:bg-slate-900/80 select-none">
+                  <div class="flex items-center gap-2 truncate">
+                    <span class="text-slate-500">#${idx + 1}</span>
+                    <span class="text-cyan-300 font-semibold">${escaparHtml(tc.name)}</span>
+                    <span class="text-slate-400 truncate max-w-[260px]">${escaparHtml(JSON.stringify(tc.arguments))}</span>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    ${okBadge}
+                    <span class="text-slate-400 text-[11px] truncate max-w-[220px]">${escaparHtml(tc.summary || "")}</span>
+                  </div>
+                </summary>
+                <div class="p-2.5 border-t border-slate-800/80 text-[11px] font-mono bg-slate-950 space-y-1.5">
+                  <div><span class="text-slate-400">Argumentos:</span> <pre class="text-slate-300 overflow-x-auto mt-0.5">${escaparHtml(JSON.stringify(tc.arguments, null, 2))}</pre></div>
+                  <div><span class="text-slate-400">Resultado:</span> <pre class="text-emerald-300/90 overflow-x-auto max-h-44 mt-0.5">${escaparHtml(typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2))}</pre></div>
+                </div>
+              </details>
+            `;
+          }).join("");
+
+          toolsHtml = `
+            <div class="mb-3 space-y-1.5">
+              <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                <span>🔧 Llamadas a Herramientas Ejecutadas (${toolCalls.length})</span>
+                <span class="text-[10px] text-slate-500">Clic para inspeccionar JSON</span>
+              </div>
+              ${items}
+            </div>
+          `;
+        }
+
+        const hitlBorder = needsConfirmation
+          ? "border-2 border-amber-500/80 hitl-highlight"
+          : "border border-slate-800";
+
+        const hitlBadge = needsConfirmation
+          ? '<span class="px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ ESPERANDO CONFIRMACIÓN HUMANA</span>'
+          : '<span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">TURNO COMPLETADO</span>';
+
+        wrapper.className = `bg-slate-900/95 ${hitlBorder} rounded-xl p-4 text-sm text-slate-200 leading-relaxed`;
+        wrapper.innerHTML = `
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[11px] font-mono rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">AGENTE PERXIA</span>
+              ${hitlBadge}
+            </div>
+          </div>
+          ${toolsHtml}
+          <div class="md-content">${renderizarMarkdown(content)}</div>
+        `;
+      }
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+
+      const banner = document.getElementById("hitl-banner");
+      if (needsConfirmation) {
+        banner.classList.remove("hidden");
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+
+    async function enviarMensajeAlBackend(message) {
+      const input = document.getElementById("chat-input");
+      const btn = document.getElementById("send-btn");
+      const indicator = document.getElementById("thinking-indicator");
+
+      agregarMensajeUI("user", message);
+      input.value = "";
+      btn.disabled = true;
+      indicator.classList.remove("hidden");
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId, message }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.ok === false) {
+          agregarMensajeUI(
+            "assistant",
+            `**Error controlado**: ${data.error || "No se pudo completar la solicitud."}`,
+            data.toolCalls || [],
+            false
+          );
+        } else {
+          agregarMensajeUI(
+            "assistant",
+            data.reply,
+            data.toolCalls || [],
+            Boolean(data.needsConfirmation)
+          );
+        }
+      } catch (err) {
+        agregarMensajeUI(
+          "assistant",
+          `**Error de red**: No fue posible conectar con el servidor (${err.message}).`,
+          [],
+          false
+        );
+      } finally {
+        btn.disabled = false;
+        indicator.classList.add("hidden");
+        await cargarEstado();
+      }
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("chat-input");
+      const msg = input.value.trim();
+      if (!msg) return;
+      enviarMensajeAlBackend(msg);
+    }
+
+    function usarPromptDemo() {
+      const prompt = "Procesa el buzón de contratos con fecha de hoy 2026-09-03. Registra lo que esté limpio, muéstrame lo que requiere revisión campo por campo y termina con el reporte de alertas. No registres nada dudoso sin preguntarme.";
+      enviarMensajeAlBackend(prompt);
+    }
+
+    function usarConfirmacionMsg006() {
+      const prompt = "Confirmo el valor 0 y la fecha fin 2027-08-31 para el contrato CM-2026-03 (msg-006). Procede a registrarlo.";
+      enviarMensajeAlBackend(prompt);
+    }
+
+    function enviarMensajeRapido(msg) {
+      enviarMensajeAlBackend(msg);
+    }
+
+    async function resetEntorno() {
+      await fetch("/api/reset", { method: "POST" });
+      document.getElementById("chat-messages").innerHTML = "";
+      document.getElementById("hitl-banner").classList.add("hidden");
+      agregarMensajeUI(
+        "assistant",
+        "Entorno `out/` reiniciado al corte original del `2026-05-30` (8 contratos base en el maestro y los 6 mensajes del buzón listos para procesar). Puedes ejecutar nuevamente el prompt de demostración.",
+        [],
+        false
+      );
+      await cargarEstado();
+    }
+
+    function cambiarTab(tab) {
+      const tabs = ["maestro", "buzon", "alertas", "auditoria"];
+      for (const t of tabs) {
+        const panel = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          panel.classList.remove("hidden");
+          btn.className = "px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-cyan-400 text-cyan-300 bg-slate-900";
+        } else {
+          panel.classList.add("hidden");
+          btn.className = "px-3 py-2 text-xs font-semibold rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+        }
+      }
+    }
+
+    function togglePanelApiKey() {
+      const panel = document.getElementById("apikey-panel");
+      panel.classList.toggle("hidden");
+    }
+
+    function toggleVerPassword() {
+      const input = document.getElementById("llm-apikey-input");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
+    function actualizarPlaceholderModelo() {
+      const prov = document.getElementById("llm-provider-select").value;
+      const modelInput = document.getElementById("llm-model-input");
+      if (prov === "gemini") {
+        modelInput.placeholder = "ej. gemini-2.5-flash";
+      } else if (prov === "openai") {
+        modelInput.placeholder = "ej. gpt-4o-mini";
+      } else if (prov === "anthropic") {
+        modelInput.placeholder = "ej. claude-3-5-haiku-latest";
+      } else if (prov === "local") {
+        modelInput.placeholder = "no requiere modelo externo";
+      } else {
+        modelInput.placeholder = "ej. gemini-2.5-flash / gpt-4o-mini";
+      }
+    }
+
+    async function guardarConfigLLM() {
+      const provider = document.getElementById("llm-provider-select").value;
+      const apiKey = document.getElementById("llm-apikey-input").value.trim();
+      const model = document.getElementById("llm-model-input").value.trim();
+      const statusMsg = document.getElementById("apikey-status-msg");
+
+      if (provider !== "local" && !apiKey) {
+        statusMsg.textContent = "⚠️ Ingresa una API Key válida o elige Motor Local.";
+        statusMsg.className = "text-xs font-mono text-amber-400";
+        return;
+      }
+
+      statusMsg.textContent = "Activando...";
+      statusMsg.className = "text-xs font-mono text-cyan-300";
+
+      try {
+        const res = await fetch("/api/llm-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider, apiKey, model }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          // Limpiar el campo visual tras enviarlo a memoria del servidor por seguridad
+          document.getElementById("llm-apikey-input").value = "";
+          statusMsg.textContent = data.hasCustomKey
+            ? `✅ LLM Activo: ${data.provider} (${data.model})`
+            : `ℹ️ Modo activo: ${data.provider} (${data.model})`;
+          statusMsg.className = "text-xs font-mono text-emerald-400";
+          await cargarSalud();
+        } else {
+          statusMsg.textContent = `❌ Error: ${data.error || "No se pudo configurar"}`;
+          statusMsg.className = "text-xs font-mono text-rose-400";
+        }
+      } catch (err) {
+        statusMsg.textContent = `❌ Error de red: ${err.message}`;
+        statusMsg.className = "text-xs font-mono text-rose-400";
+      }
+    }
+
+    async function usarModoLocal() {
+      document.getElementById("llm-provider-select").value = "local";
+      document.getElementById("llm-apikey-input").value = "";
+      document.getElementById("llm-model-input").value = "";
+      const statusMsg = document.getElementById("apikey-status-msg");
+      await fetch("/api/llm-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: "local", apiKey: "", model: "" }),
+      });
+      statusMsg.textContent = "ℹ️ Motor ReAct Local activado (sin API Key).";
+      statusMsg.className = "text-xs font-mono text-cyan-300";
+      await cargarSalud();
+    }
+
+    async function cargarSalud() {
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        const keyTag = data.hasCustomKey ? " · 🔑 API Key Activa" : "";
+        document.getElementById("provider-label").textContent = `${data.provider} (${data.model})${keyTag}`;
+      } catch {
+        document.getElementById("provider-label").textContent = "desconectado";
+      }
+    }
+
+    async function cargarEstado() {
+      try {
+        const res = await fetch("/api/state");
+        const data = await res.json();
+        if (!data.ok) return;
+
+        // 1. Maestro
+        const maestro = data.maestro || [];
+        document.getElementById("count-maestro").textContent = maestro.length;
+        const rowsHtml = maestro.map(r => {
+          const esNuevo = r.fecha_registro > "2026-05-30";
+          const rowBg = esNuevo ? "bg-emerald-950/30" : "";
+          const badgePoliza = r.estado_poliza === "pendiente"
+            ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono">pendiente</span>'
+            : r.estado_poliza === "vigente"
+            ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">vigente</span>'
+            : '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-mono">no_aplica</span>';
+
+          return `
+            <tr class="border-t border-slate-800/80 ${rowBg} text-[11px]">
+              <td class="px-2.5 py-2 font-mono font-semibold text-cyan-300 whitespace-nowrap">
+                ${escaparHtml(r.id_contrato)}
+                ${esNuevo ? '<span class="ml-1 px-1 py-0.2 bg-emerald-500/20 text-emerald-300 rounded text-[9px]">NUEVO</span>' : ''}
+              </td>
+              <td class="px-2.5 py-2 text-slate-200">${escaparHtml(r.cliente)} <span class="text-slate-500 font-mono">(${escaparHtml(r.pais)})</span></td>
+              <td class="px-2.5 py-2 font-mono text-slate-300 whitespace-nowrap">${escaparHtml(r.moneda)} ${Number(r.valor).toLocaleString("es-CO")}</td>
+              <td class="px-2.5 py-2 font-mono text-slate-400 whitespace-nowrap">${escaparHtml(r.fecha_inicio)} → ${escaparHtml(r.fecha_fin)}</td>
+              <td class="px-2.5 py-2">${badgePoliza}</td>
+            </tr>
+          `;
+        }).join("");
+
+        document.getElementById("maestro-table-container").innerHTML = `
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-400 text-[11px] uppercase font-mono">
+                <th class="px-2.5 py-2">ID</th>
+                <th class="px-2.5 py-2">Cliente</th>
+                <th class="px-2.5 py-2">Valor</th>
+                <th class="px-2.5 py-2">Vigencia</th>
+                <th class="px-2.5 py-2">Póliza</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        `;
+
+        // 2. Buzón
+        const buzonTodos = data.buzonTodos || [];
+        const procesados = new Set(data.procesados || []);
+        const pendientesCount = buzonTodos.filter(m => !procesados.has(m.id)).length;
+        document.getElementById("count-buzon").textContent = `${pendientesCount}/${buzonTodos.length}`;
+
+        document.getElementById("buzon-list-container").innerHTML = buzonTodos.map(m => {
+          const yaProc = procesados.has(m.id);
+          const badge = yaProc
+            ? '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">PROCESADO</span>'
+            : '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">PENDIENTE</span>';
+          return `
+            <div class="p-3 rounded-lg bg-slate-900/90 border border-slate-800 text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-cyan-300">${escaparHtml(m.id)}</span>
+                ${badge}
+              </div>
+              <div class="font-medium text-slate-200">${escaparHtml(m.asunto)}</div>
+              <div class="text-slate-400 text-[11px]">De: <span class="font-mono text-slate-300">${escaparHtml(m.de)}</span> · Adjunto: <code class="text-amber-300">${escaparHtml((m.adjuntos || []).join(", "))}</code></div>
+            </div>
+          `;
+        }).join("");
+
+        // 3. Alertas
+        document.getElementById("alertas-container").textContent =
+          data.alertasMarkdown || "Aún no se ha generado out/alertas.md. Ejecuta el procesamiento del buzón o solicita el reporte de alertas.";
+
+        // 4. Historial y Logs
+        const hist = data.historial || [];
+        document.getElementById("historial-container").innerHTML = hist.length === 0
+          ? '<div class="text-slate-500">Sin entradas en historial.jsonl</div>'
+          : hist.map(h => `
+              <div class="p-2 rounded bg-slate-900 border border-slate-800 text-slate-300">
+                <span class="text-emerald-400 font-semibold">${escaparHtml(h.accion.toUpperCase())}</span> ·
+                <span class="text-cyan-300">${escaparHtml(h.id_contrato)}</span> (${escaparHtml(h.mensaje_id)}) →
+                <span class="text-slate-400">${escaparHtml(JSON.stringify(h.cambios))}</span>
+              </div>
+            `).join("");
+
+        const logs = data.logs || [];
+        document.getElementById("logs-container").innerHTML = logs.length === 0
+          ? '<div class="text-slate-500">Sin entradas en log.jsonl</div>'
+          : logs.slice(-20).reverse().map(l => `
+              <div class="p-1.5 rounded bg-slate-900/70 border border-slate-800/80 text-slate-400">
+                <span class="${l.ok ? 'text-emerald-400' : 'text-amber-400'}">●</span>
+                <span class="text-cyan-300">${escaparHtml(l.herramienta)}</span>
+                ${l.mensaje_id ? `<span class="text-slate-300">[${escaparHtml(l.mensaje_id)}]</span>` : ''} —
+                <span>${escaparHtml(l.resumen)}</span>
+              </div>
+            `).join("");
+      } catch (err) {
+        console.error("Error cargando estado:", err);
+      }
+    }
+
+    cargarSalud();
+    cargarEstado();
+  </script>
+</body>
+</html>
+
